@@ -1,0 +1,13 @@
+---
+layout:     post
+title:      "Example Post"
+subtitle:   "赛博人会梦到电子羊么"
+date:       2022-12-25
+author:     "dimi"
+header-img: "img/post-bg-js-version.jpg"
+tags:
+    - 前端开发
+    - JavaScript
+---
+
+bruburburburburburu
