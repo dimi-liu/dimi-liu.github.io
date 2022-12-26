@@ -1,6 +1,6 @@
 # Site settings
-title: dimi blog
-SEOTitle: dimi blog
+title: dimi's blog
+SEOTitle: dimi's blog
 header-img: img/home-bg-art.jpg
 email: 
 description:
@@ -74,7 +74,7 @@ kramdown:
 
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
-sidebar-about-description: "试着做一个有趣的人"
+sidebar-about-description: "三分钟退堂鼓表演艺术家"
 sidebar-avatar: /img/avatar-dimi.jpg # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
