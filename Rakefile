@@ -9,7 +9,7 @@ CONFIG = {
   'themes' => File.join(SOURCE, "_includes", "themes"),
   'layouts' => File.join(SOURCE, "_layouts"),
   'posts' => File.join(SOURCE, "_posts"),
-  'post_ext' => "md",
+  'post_ext' => "markdown",
   'theme_package_version' => "0.1.0"
 }
 
@@ -22,6 +22,7 @@ task :post do
   slug = title.downcase.strip.gsub(' ', '-').gsub(/[^\w-]/, '')
   begin
     date = (ENV['date'] ? Time.parse(ENV['date']) : Time.now).strftime('%Y-%m-%d')
+    time = (ENV['date'] ? Time.parse(ENV['date']) : Time.now).strftime('%Y-%m-%d %T')
   rescue Exception => e
     puts "Error - date format must be YYYY-MM-DD, please check you typed it correctly!"
     exit -1
@@ -37,9 +38,9 @@ task :post do
     post.puts "layout: post"
     post.puts "title: \"#{title.gsub(/-/,' ')}\""
     post.puts "subtitle: \"#{subtitle.gsub(/-/,' ')}\""
-    post.puts "date: #{date}"
+    post.puts "date: #{time}"
     post.puts "author: \"dimi\""
-    post.puts "header-img: \"img/post-bg-2015.jpg\""
+    post.puts "header-img: \"img/post-bg-alitrip.jpg\""
     post.puts "catalog: true"
     post.puts "tags: []"
     post.puts "---"

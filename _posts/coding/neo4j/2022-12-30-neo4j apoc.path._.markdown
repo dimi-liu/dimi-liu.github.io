@@ -1,0 +1,99 @@
+---
+layout: post
+title: "neo4j apoc.path._"
+subtitle: "记录下apoc.path._ 几个api的使用参数和区别"
+date: 2022-12-30 14:50:59
+author: "dimi"
+header-img: "img/post-bg-alitrip.jpg"
+catalog: true
+tags: [coding,neo4j]
+---
+
+apoc.path.* 所有的api清单在[这里](https://neo4j.com/labs/apoc/4.4/overview/apoc.path/)，下面简单记录下常用参数和区别
+
+## apoc.path.expandConfig (apoc.path.spanningTree)
+
+当使用 expandConfig 参数uniqueness: "NODE_GLOBAL" 时，两个api结果相同，因此合并写，[官网doc在这](https://neo4j.com/labs/apoc/4.4/graph-querying/expand-paths-config/)
+
+样例查询如下：  
+
+```sql
+MATCH (p:Person {name: "Joe"})
+CALL apoc.path.expandConfig(p, {
+    relationshipFilter: "FOLLOWS>",
+    minLevel: 1,
+    maxLevel: 3,
+    uniqueness: "RELATIONSHIP_PATH" // default
+})
+YIELD path
+RETURN [node in nodes(path) | node.name] AS nodes, length(path) AS hops
+ORDER BY hops;
+```
+
+一个[来自官网](https://neo4j.com/labs/apoc/4.4/graph-querying/expand-paths-config/#path-expander-paths-config-examples)的简单的样例图为
+
+![sample_graph](/img/in-post/neo4j-apoc.path._/sample_graph.png)
+<small class="img-hint">sample_graph</small>
+
+#### 1.relationshipFilter: "FOLLOWS>"
+
+rel label 为 FOLLOWS 的数据，并且方向为 List<Node> p 的下游
+
+#### 2.minLevel，maxLevel
+
+遍历的层级，默认为-1 
+
+#### 3.**uniqueness** 几个常用值的区别
+
+uniqueness参数完整列表在[这里](https://neo4j.com/labs/apoc/4.4/graph-querying/expand-paths-config/#path-expander-paths-config-config-uniqueness)
+
+- RELATIONSHIP_PATH  
+这个是expandConfig的默认设置，对于路径上的每个node，都有一个unique path（relationship wise），查询结果为：
+
+    | nodes                              | hops |
+    | ---------------------------------- | ---- |
+    | ["Joe", "Zhen"]                    | 1    |
+    | ["Joe", "Praveena"]                | 1    |
+    | ["Joe", "Mark"]                    | 1    |
+    | ["Joe", "Zhen", "John"]            | 2    |
+    | ["Joe", "Praveena", "Joe"]         | 2    |
+    | ["Joe", "Mark", "Stefan"]          | 2    |
+    | ["Joe", "Praveena", "Joe", "Zhen"] | 3    |
+    | ["Joe", "Praveena", "Joe", "Mark"] | 3    |
+    | ["Joe", "Mark", "Stefan", "Joe"]   | 3    |
+    
+- NODE_PATH   
+类似于RELATIONSHIP_PATH，区别在于在路径返回到遍历过的点时，不会继续遍历这条路径，查询结果为：
+
+    | nodes                     | hops |
+    | ------------------------- | ---- |
+    | ["Joe", "Zhen"]           | 1    |
+    | ["Joe", "Praveena"]       | 1    |
+    | ["Joe", "Mark"]           | 1    |
+    | ["Joe", "Zhen", "John"]   | 2    |
+    | ["Joe", "Mark", "Stefan"] | 2    |
+
+可以看出和 RELATIONSHIP_PATH 相比，少了从Praveena FOLLOWS 关系返回Joe后，重新遍历出来的数据；**如果可以确定为无环图，则两者结果一样**
+
+- NODE_GLOBAL  
+这个是spanningTree和subGraphNode的固定设置，每个node只会被遍历一次，可以用这个生成子图，效率很高，但是path是可能会漏掉的
+
+- RELATIONSHIP_GLOBAL  
+类似NODE_GLOBAL，只是每个rel只会被遍历一次
+
+#### 4.endNodes和terminatorNodes
+
+- endNodes  
+只有这些节点可以作为返回path的最后一个node，但是可能的话递归还会继续向下进行
+
+- terminatorNodes  
+只有这些节点可以作为返回path的最后一个node，并且递归会终止
+
+#### 5.whitelistNodes和blacklistNodes
+
+- whitelistNodes  
+Only these nodes are allowed in the expansion (though endNodes and terminatorNodes will also be allowed, if present).
+
+- blacklistNodes  
+None of the paths returned will include these nodes.
+
