@@ -5,6 +5,7 @@ subtitle:   "所以穿山甲到底说了什么？"
 date:       2022-12-25
 author:     "dimi"
 header-img: "img/post-bg-alitrip.jpg"
+catalog:    true
 tags:
     - 碎碎念
 ---
