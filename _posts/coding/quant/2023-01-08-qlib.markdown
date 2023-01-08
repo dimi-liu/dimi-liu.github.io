@@ -1,0 +1,59 @@
+---
+layout: post
+title: "qlib quick start"
+subtitle: "install + initialization"
+date: 2023-01-08 20:21:17
+author: "dimi"
+header-img: "img/post-bg-alitrip.jpg"
+catalog: true
+tags: [coding,quant,qlib]
+---
+
+### 0.各种链接
+
+| name        | url                                              |
+|:-----------:| ------------------------------------------------ |
+| github      | https://github.com/microsoft/qlib                |
+| 个人项目     | https://github.com/dimi-liu/qlib/tree/dev_dimi   |
+| 官方doc      | https://qlib.readthedocs.io/en/latest/index.html |
+| akshare doc | https://akshare.akfamily.xyz/index.html          |
+
+### 1.install
+
+官方推荐py版本为3.8，且需要 pyorch lightGBM
+
+pip安装即可
+
+```bash
+pip install pyqlib
+# 安装完成后验证
+>>> import qlib
+>>> qlib.__version__    
+```
+
+如果需要使用内嵌数据爬虫模块和导入数据，建议拉取项目，然后新建个文件夹。[个人开发分支在这。](https://github.com/dimi-liu/qlib/tree/dev_dimi)
+
+
+
+### 2. data prepare
+
+This dataset is created by public data collected by crawler scripts in   scripts/data_collector/
+https://github.com/dimi-liu/qlib/tree/main/scripts
+
+下载cn数据
+
+```bash
+# download 1d
+python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn
+
+# download 1min
+python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/qlib_cn_1min --region cn --interval 1min
+```
+
+数据路径在 .qlib/qlib_data
+
+calendars：该数据集的所有交易日信息。  
+features：个股的特征信息。  
+instruments：所有股票的代码集合，现在还提供指数成分股（中证500，沪深300，中证100）
+
+Qlib also provides the scripts in scripts/data_collector to help users crawl the latest data on the Internet and convert it to qlib format.
