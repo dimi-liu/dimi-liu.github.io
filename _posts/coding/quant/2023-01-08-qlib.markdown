@@ -9,14 +9,28 @@ catalog: true
 tags: [coding,quant,qlib]
 ---
 
-### 0.各种链接
+### 0.准备
 
+#### 一些url
 | name        | url                                              |
 |:-----------:| ------------------------------------------------ |
 | github      | https://github.com/microsoft/qlib                |
 | 个人项目     | https://github.com/dimi-liu/qlib/tree/dev_dimi   |
 | 官方doc      | https://qlib.readthedocs.io/en/latest/index.html |
 | akshare doc | https://akshare.akfamily.xyz/index.html          |
+
+#### 环境搭建
+
+```bash
+# 新建qlib环境 使用3.8版本 这里会自动安装numpy pandas pytorch lightGBM等包
+conda create -p D:\anaconda3\envs\qlib python=3.8
+pip install pyqlib
+# 安装jupyter相关包
+pip install ipykernel   
+pip install jupyter
+# 安装其他7788的
+pip install pathlib
+```
 
 ### 1.install
 

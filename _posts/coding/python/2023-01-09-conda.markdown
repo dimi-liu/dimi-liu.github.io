@@ -1,0 +1,117 @@
+---
+layout: post
+title: "pip+conda 命令记录"
+subtitle: "python 环境管理"
+date: 2023-01-09 13:21:17
+author: "dimi"
+header-img: "img/post-bg-alitrip.jpg"
+catalog: true
+tags: [coding,python,conda]
+---
+
+### 环境变量修改
+
+### 修改镜像源
+
+#### conda镜像源
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --set show_channel_urls yes
+
+#### pip镜像源
+
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+>>> Writing to C:\Users\JD_Li\AppData\Roaming\pip\pip.ini
+
+
+pip修改镜像源
+国内源：
+新版ubuntu要求使用https源，要注意。
+
+清华：https://pypi.tuna.tsinghua.edu.cn/simple
+
+阿里云：http://mirrors.aliyun.com/pypi/simple/
+
+中国科技大学 https://pypi.mirrors.ustc.edu.cn/simple/
+
+华中科技大学：http://pypi.hustunique.com/
+
+山东理工大学：http://pypi.sdutlinux.org/
+
+豆瓣：http://pypi.douban.com/simple/
+
+### 常用conda命令
+
+#### 1.conda info   展示当前conda环境的信息
+
+| conda info    | 展示当前conda环境的信息                     |
+| ------------- |:---------------------------------- |
+| -e, --envs    | 列出conda下的所有环境                      |
+| -s, --system  | 列出系统环境变量                           |
+| -a, --all     | 显示所有信息                             |
+| --base        | 显示base环境的路径                        |
+| --json        | 数据输出格式为json                        |
+| -v, --verbose | -v为info, -vv为debug信息, -vvv为trace信息 |
+| -q, --quiet   | Do not display progress bar        |
+
+#### 2.conda info   查看当前环境下的包
+
+| conda list              | 查看当前环境下的包        |
+| ----------------------- | ---------------- |
+| -e\|--export > file.txt | 将包信息导出到 file.txt |
+| -n, --name              | 指定环境             |
+
+#### 3.conda activate XXX   激活XXX环境
+
+#### 4. conda create
+
+| conda create           | 创建环境              |
+| ---------------------- | ----------------- |
+| --clone ENV            | 从ENV环境clone       |
+| -n, --name ENVIRONMENT | 指定环境名为ENVIRONMENT |
+| -p/--prefix PATH       | 指定安装路径为PATH       |
+| python=3.8.6           | 指定py版本3.8.6       |
+| --use-local            | 使用本地文件，而不是远程镜像    |
+
+- 对环境命名，可以使用 -n 或者 -p，但是两个不能一起用
+
+一些例子
+```bash
+# 在 /path 路径，创建py3.8版本的环境
+conda create  -p /path  python=3.8
+
+# 创建 myclone环境，从myenv环境复制
+conda create --name myclone --clone myenv
+
+# 创建环境 从base环境复制到路径 D:\anaconda3\envs\d2l-ts，环境名为d2l-ts，使用本地文件
+conda create -p D:\anaconda3\envs\d2l-ts --clone base --use-local
+
+# 在指定路径创建环境，环境名为 finance，用python 3.8版本
+conda create -p D:\anaconda3\envs\finance python=3.8.5
+```
+
+
+### 常用pip命令
+
+#### 1.pip install XXX   安装
+
+```bash
+# 安装qlib包
+pip install qlib
+
+# 安装 tensorflow 包，指定版本，并且指定镜像
+pip install tensorflow==2.8.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 升级 qlib
+pip install --upgrade qlib
+
+# 卸载 qlib
+pip uninstall qlib
+```
+
+### 一些场景
+
+
+### 涉及jupyter的安装
+
+安装ipykernel
+
