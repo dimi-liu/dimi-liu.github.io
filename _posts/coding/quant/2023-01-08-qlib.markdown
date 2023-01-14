@@ -12,8 +12,9 @@ tags: [coding,quant,qlib]
 ### 0.准备
 
 #### 一些url
+
 | name        | url                                              |
-|:-----------:| ------------------------------------------------ |
+|-----------  | ------------------------------------------------ |
 | github      | https://github.com/microsoft/qlib                |
 | 个人项目     | https://github.com/dimi-liu/qlib/tree/dev_dimi   |
 | 官方doc      | https://qlib.readthedocs.io/en/latest/index.html |
