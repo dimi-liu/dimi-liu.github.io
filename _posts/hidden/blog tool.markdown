@@ -3,11 +3,16 @@
 
 安装ruby  https://rubyinstaller.org/downloads/  
 需要一起安装devkit，记得添加环境变量
+之后安装 Bundler 
 
 ``` bash
-    # complie
-    jekyll serve
-    # Server address: http://127.0.0.1:4000/
+bundle install 
+```
+
+``` bash
+# complie
+jekyll serve
+# Server address: http://127.0.0.1:4000/
 ```
 
 1. 生成新的markdown
