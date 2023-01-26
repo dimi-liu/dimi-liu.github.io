@@ -80,7 +80,7 @@ Broker首先会实例化一个CommInfoBase，然后记录到commoninfo字典中�
             ('commtype', CommInfoBase.COMM_PERC),
         )
     ```
-
+    
     假如你希望按照老方法输入0.001表示0.1%,那么还可以这样定义：
 
     ```python
@@ -162,3 +162,7 @@ Broker首先会实例化一个CommInfoBase，然后记录到commoninfo字典中�
             else:
                 return 0  # 防止特殊情况下size为0.
         ```
+
+
+
+
