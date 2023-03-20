@@ -26,7 +26,7 @@ E = \lbrace (x,y) \in \mathbb{R}^2 | \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1\rbrac
 $$
 
 $$
-E = \lbrace (x,y) \in \mathbb{R}^2 | y^2 = x^3 + ax + b, 4a^3 + 27b^2 \neq 0\rbrace (椭圆曲线Weierstrass通用式)
+E = \lbrace (x,y) \in \mathbb{R}^2 | y^2 = x^3 + ax + b, 4a^3 + 27b^2 \neq 0\rbrace (椭圆曲线)
 $$
 
 之所以取名叫椭圆曲线，是因为该曲线方程跟求椭圆弧长的积分公式相似。椭圆曲线关于X轴对称，判定式不等于零是为了椭圆曲线不存在奇异点，即处处光滑可导，这样才能进行椭圆曲线上的加法运算。下面一些系数适合用于加密的椭圆曲线及其图像。
