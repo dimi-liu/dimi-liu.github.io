@@ -1,0 +1,41 @@
+---
+layout: post
+title: "【隐私计算】椭圆曲线签名算法"
+subtitle: "椭圆曲线"
+date: 2023-03-20 15:52:47
+author: "dimi"
+header-img: "img/post-bg-alitrip.jpg"
+catalog: true
+tags: [coding,隐私计算,椭圆曲线]
+---
+
+some link
+
+[密码学基础2：椭圆曲线密码学原理分析](http://events.jianshu.io/p/3b810faff3ba)  
+[一文看懂椭圆曲线签名算法](https://zhuanlan.zhihu.com/p/455030060?utm_id=0)
+
+
+# 一 椭圆曲线概述
+
+## 1. 表达式
+椭圆曲线不是椭圆，通常我们讨论的椭圆曲线的曲线方程是一个二元三次方程，它有多种形式，在椭圆曲线密码体系中，最常用的是Weierstrass通用式  
+
+$$E = \lbrace (x,y) \in \R^2 | \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1\rbrace (椭圆)$$
+
+$$E = \lbrace (x,y) \in \R^2 | y^2 = x^3 + ax + b, 4a^3 + 27b^2 \neq 0\rbrace (椭圆曲线Weierstrass通用式)$$ 
+
+之所以取名叫椭圆曲线，是因为该曲线方程跟求椭圆弧长的积分公式相似。椭圆曲线关于X轴对称，判定式不等于零是为了椭圆曲线不存在奇异点，即处处光滑可导，这样才能进行椭圆曲线上的加法运算。下面一些系数适合用于加密的椭圆曲线及其图像。
+
+![椭圆曲线图像](/img/in-post/privacyCompute/EDCH_img.png)  
+<small class="img-hint">对应参数取值的椭圆曲线图像↑</small>
+
+$$b = 1, a \in \lbrace 2,1,0,-1,-2,-3 \rbrace$$
+
+## 2. 数学基础
+
+一些抽代的基础知识，**群**，**域**的定义。  
+在密码学中，通常只对有限元素的域感兴趣，这种域称为有限域(Finite Field)。有限域中我们经常用到的是**素数域**，所谓素数域，就是**阶为素数的有限域**。  
+比如当 $p$ 为素数时，整数环 $\Z_p$ 就是一个素数域，可以记作 $\mathbb{F}_p$。在素数域 $\mathbb{F}_p$ 中进行算术运算，需要遵守整数环的规则，即加法是模 $p$ 加法，而乘法是模 $p$ 乘法。
+
+## 3. 椭圆曲线中的群论
+
