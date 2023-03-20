@@ -21,7 +21,10 @@ jekyll serve
     rake post title="main" subtitle="sub"
 ```
 
-3. 提交格式
+2. 提交格式
 
     post + 内容
 
+3. 修改渲染代码
+
+    在layout里面，一些引用在include，自定义了mathjax类，数学公式
