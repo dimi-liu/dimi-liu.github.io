@@ -12,9 +12,9 @@ tags: [coding,python]
 在这里记录一些python的tricky方法
 
 ## built-in
+#### getattr
 python build-in 方法，用来返回obj的name的方法
 
-#### getattr
 ```python
 getattr(object, name[, default])
 
