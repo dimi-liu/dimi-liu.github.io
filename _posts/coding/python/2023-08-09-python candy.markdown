@@ -47,6 +47,77 @@ import numpy
 getattr(numpy, 'abs')(-1) # Output: '1'
 ```
 
+#### try——Python异常处理
+[一个链接](https://zhuanlan.zhihu.com/p/360807803)  
+python 的异常捕获语句为 try-except-else-finally
+
+ - 无论有无异常，finally代码段一定会被执行，哪怕exit后，finally还是会被执行
+ - 若有异常，则执行except代码段
+ - 若无异常且无return，则执行else代码段
+ - 若无异常且有return， try代码段中有return 语句， 则else代码段不会被执行
+ - 若无异常且有return， try代码段没有return语句，则else代码段会执行
+
+```python
+try :
+    print('before try')
+    a = 5.0 / 1.0
+    print('after try')
+except :
+    print('its except')
+else :
+    print('its else')
+finally :
+    print('its finally')
+# before try
+# after try
+# its else
+# its finally
+
+try :
+    print('before try')
+    a = 5.0 / 0.0
+    print('after try')
+except :
+    print('its except')
+else :
+    print('its else')
+finally :
+    print('its finally')
+# before try
+# its except
+# its finally
+
+try :
+    print('before try')
+    a = 5.0 / 0.0
+    print('after try')
+except :
+    exit(1)
+    print('its except')
+else :
+    print('its else')
+finally :
+    print('its finally')
+# before try
+# its finally
+
+try :
+    print('before try')
+    a = 5.0 / 1.0
+    exit(0)
+    print('after try')
+except :
+    exit(1)
+    print('its except')
+else :
+    print('its else')
+finally :
+    print('its finally')
+# before try
+# its finally
+```
+
+
 #### with方法
 1. 紧跟with后面的语句被求值后，返回对象的 __enter__() 方法被调用，这个方法的返回值将被赋值给as后面的变量
 2. 当with后面的代码块全部被执行完之后，将调用前面返回对象的 __exit__() 方法
