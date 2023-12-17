@@ -1,0 +1,298 @@
+---
+layout: post
+title: "【linux】初始化配置"
+subtitle: "linux"
+date: 2023-12-16 22:18:14
+author: "dimi"
+header-img: "img/post-bg-universe.jpg"
+catalog: true
+tags: [coding,linux,tool]
+---
+
+腾讯云要到期了，续期丧心病狂的贵，正好阿里云有99/年的活动，能续三年，买了个新实例，顺便记录下机器初始化的坑
+
+## linux初始化
+
+### 用户相关
+
+拿到ip实例root登录后，重置一下root密码，复杂一点，反正后面也用不上。然后先**创建一个非root用户**
+
+```bash
+# 创建用户 opr
+useradd -m opr
+passwd opr
+# 输入密码
+cat /etc/passwd  # 查看下刚才新添加的用户的记录
+```
+
+用户设置sudo su - root 切换权限
+
+```bash
+vim /etc/sudoers
+#添加一行
+opr ALL=(ALL) NOPASSWD: /usr/bin/su
+```
+
+### 环境变量
+
+采用export设置的环境变量，在退出Shell后就会失效，下次登录时需要重新设置。如果希望环境变量永久生效，需要在登录脚本文件中配置。
+
+脚本文件执行顺讯
+
+/etc/profile->/etc/profile.d->/etc/bashrc->用户的.bash_profile->用户的.bashrc
+
+用户登录时会执行/etc/profile文件中设置系统的环境变量。但是，Linux不建议在/etc/profile文件中设置系统环境变量，在/etc/profile.d目录中增加环境变量脚本文件，这是Linux推荐的方法。/etc/profile在每次启动时会执行 /etc/profile.d下全部的脚本文件。/etc/profile.d比/etc/profile好维护，不想要什么变量直接删除 /etc/profile.d下对应的 shell 脚本即可，/etc/profile.d目录下有很多脚本文件。
+
+/etc/profile 是所有用户的环境变量，/etc/enviroment是系统的环境变量
+
+也可以在/etc/bashrc文件中设置环境变量，该文件配置的环境变量将会影响全部用户使用的bash shell。但是Linux也不建议在/etc/bashrc文件中设置系统环境变量。
+
+详细doc在这[【linux】环境变量 - dimi's blog](https://dimi-liu.github.io/2023/08/13/linux-环境变量/)
+
+选择在/etc/profile.d中新增一个环境变量的脚本
+
+### ssh相关
+
+#### 生成ssh秘钥与本地远程登录
+
+在opr用户下生成ssh秘钥对
+
+```bash
+ssh-keygen
+# 会生成 ~/.ssh文件夹
+# 为了能够本地远程服务器，在文件夹中新增 authorized_keys 文件，用来存储本地电脑的公钥
+vim authorized_keys  # 然后粘贴公钥上去
+
+# 或者直接在本地运行命令，上传本地公钥到机器的opr用户
+ssh-copy-id -i ~/.ssh/id_rsa.pub opr@ip
+```
+
+此时ssh可能不生效，大概率是文件权限问题，sshd为了安全，对属主的目录和文件权限有所要求。如果权限不对，则ssh的免密码登陆不生效，具体报错可以看 /var/log/secure。
+
+- 服务器上.ssh目录的权限必须是700
+
+- 服务器上authorized_keys文件权限必须是600或者644
+
+- 服务器上用户家目录文件权限必须是700（用户目录权限也以可为755，就是不能是77x），比如用户名是opr，则/home/opr这个目录权限必须是700
+  
+  如果还不行，再看下面这三条（目前上面的改完我自己就可以了~~）
+
+- 有可能是StrictModes问题，/etc/ssh/sshd_config 找到#StrictModes yes改成StrictModes no
+
+- 有可能是PubkeyAuthentication问题，vi /etc/ssh/sshd_config 找到PubkeyAuthentication改成yes
+
+- ssh -vvv opr@ip 查看详情，根据输出内容具体问题具体分析了
+
+#### sshd配置修改
+
+因为公网经常有人批量扫端口，为了安全起见，需要对ssh设置进行一些更改
+
+- 禁用 root 用户登录。PermitRootLogin no
+- 修改 22 端口为其他。Port xxx
+- 禁用密码登录。只支持受信任的机器通过 SSH 公钥免密登录。PasswordAuthentication
+  no （这个有点太严厉了，没必要）
+
+```bash
+vim /etc/ssh/sshd_config 
+# 修改完后需要重启服务
+service sshd restart
+```
+
+用云服务器修改完端口后可能会发现无法登录，是因为防火墙策略没改，需要到控制台上新增端口的策略，建议一些常用的端口都禁掉，比如22，3306，改用别的自定义
+
+#### ssh文件传输
+
+```bash
+# 上传文件
+scp -P port /path/filename username@servername:/path   
+# 上传目录
+scp -P port -r local_dir username@servername:remote_dir
+# 下载文件
+scp -P port username@servername:/path/filename /var/www/local_dir（本地目录）
+# 下载目录
+scp -P port -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
+
+
+```
+
+## 软件安装
+
+### git
+
+安装
+
+```bash
+wget -c https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.43.0.tar.gz  --no-check-certificate
+mkdir ./git
+tar -axvf ./git-2.43.0.tar.gz -C ./
+
+# 指定安装目录 并执行安装命令
+cd ./git-2.43.0
+./configure --prefix=/app/git/prefix && make && make install
+# git 安装到了/app/git，删除 ./git-2.43.0
+rm -rf ./git-2.43.0
+
+# 在/etc/profile.d自定义脚本中新增环境变量
+vim /etc/profile.d/dimi_env.sh
+GIT_HOME=/app/git/prefix
+```
+
+其他设置
+
+```bash
+# 设置git名称 需要使用opr用户
+git config --global user.name "dimi aliyun"
+
+# 配置github和gitee
+```
+
+### conda
+
+#### 安装miniconda
+
+镜像下载和镜像源配置可参考tuna
+
+[anaconda | 镜像站使用帮助 | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/)
+
+```bash
+# 查看tuna资源
+wget -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py311_23.10.0-1-Linux-x86_64.sh --no-check-certificate
+# 执行脚本安装
+sh Miniconda3-py311_23.10.0-1-Linux-x86_64.sh
+# 添加环境变量
+CONDA_HOME=/app/miniconda3
+export CONDA_HOME
+export PATH=$CONDA_HOME/bin:$PATH
+
+# 修改默认的python路径，/usr/bin下的软链接,使用conda基础环境
+cd /usr/bin
+rm -rf python
+ln -s /app/miniconda3/bin/python  /usr/bin/python
+
+# conda init选择no，在opr用户下 .bash_profile 手动init conda，添加下面的代码
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('$CONDA_HOME/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "$CONDA_HOME/etc/profile.d/conda.sh" ]; then
+        . "$CONDA_HOME/etc/profile.d/conda.sh"
+    else
+        export PATH="$CONDA_HOME/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+# echo "conda环境自动激活并切换到当前用户虚拟环境，请不要在base环境下操作"
+conda activate
+```
+
+#### 修改pip、conda基础设置
+
+```bash
+# opr用户修改pip镜像源
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
+# 下面这个需要sudo权限
+pip config --global set install.trusted-host pypi.tuna.tsinghua.edu.cn
+
+
+
+# opr用户修改conda镜像源
+# 先生成.condarc文件
+conda config --set show_channel_urls yes
+# 修改文件内容 https://mirrors.tuna.tsinghua.edu.cn/help/anaconda
+vim .condarc
+conda info
+```
+
+### docker
+
+同样参考tuna
+
+[docker-ce | 镜像站使用帮助 | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror](https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/)
+
+```bash
+# 使用root
+# 如果你之前安装过 docker，请先删掉
+yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+
+# 安装依赖，下载 repo 文件，并把软件仓库地址替换为镜像站：
+yum install -y yum-utils
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sed -i 's+https://download.docker.com+https://mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo
+
+
+# 安装
+yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl start docker
+
+# 添加阿里云镜像，指定数据路径
+vim /etc/docker/daemon.json
+{
+  "registry-mirrors": ["https://16hpc9ez.mirror.aliyuncs.com"],
+  "data-root": "/app/docker_data"
+}
+systemctl daemon-reload
+systemctl restart docker
+```
+
+### mysql
+
+为了省事，docker直接拉了
+
+```bash
+docker pull mysql
+# 运行mysql
+docker run -d --name docker-mysql -v /app/docker_data/mysql:/var/lib/mysql -p 3330:3306 -e MYSQL_ROOT_PASSWORD="paic123$" mysql
+# 进入容器
+docker exec -it docker-mysql /bin/bash
+# 登录mysql
+mysql -h localhost -u root -ppaic123$
+CREATE DATABASE xxx
+CREATE USER 'user'@'%' IDENTIFIED BY 'password';
+# 第一个*是数据库，可以改成允许访问的数据库名称,第二个*是数据库的表名称，代表允许访问任意的表
+grant all privileges on *.* to 'user'
+```
+
+### dolt
+
+```bash
+# 下载脚本
+curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh
+# 懒得自定义内容了，直接安装
+sh install.sh 
+# 服务器直接从git下东西太难了，本地下载然后传上去吧
+# 参考install.sh安装
+tar zxf dolt-linux-amd64.tar.gz
+install -o 0 -g 0 dolt-linux-amd64/bin/dolt /usr/local/bin
+install -o 0 -g 0 -d /usr/local/share/doc/dolt/
+install -o 0 -g 0 -m 644 dolt-linux-amd64/LICENSES /usr/local/share/doc/dolt/
+# 删除相关包
+rm dolt-linux-amd64.tar.gz
+rm -r dolt-linux-amd64
+
+# 拉去数据集
+dolt clone chenditc/investment_data
+
+
+```
+
+### vscode
+
+配置可以见vscode插件配置doc[【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
+
+
+
+
+
+

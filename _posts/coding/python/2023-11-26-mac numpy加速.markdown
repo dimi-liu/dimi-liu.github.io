@@ -1,0 +1,17 @@
+---
+layout: post
+title: "mac numpy加速"
+subtitle: "some tricks here"
+date: 2023-11-26 11:21:17
+author: "dimi"
+header-img: "img/post-bg-alitrip.jpg"
+catalog: true
+tags: [coding,python,mac]
+---
+
+基于m芯片，numpy可以使用一些基于npu的加速，因为pandas会依赖numpy，因此这个加速可以使用下
+
+截止2023-11-26，macOS13和numpy1.26的新特性
+https://numpy.org/doc/stable/release/1.26.0-notes.html
+https://github.com/numpy/numpy/pull/24053
+https://numpy.org/doc/stable/user/building.html

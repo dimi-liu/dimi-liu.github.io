@@ -36,7 +36,7 @@ PreferredAuthentications publickey
 IdentityFile "C:\Users\{用户}\.ssh\id_rsa"
 Port <ssh可用端口>
 ```
-防止在登录端的 .ssh下面。
+放置在登录端的 .ssh下面。
 
 ### 秘钥权限问题
 如果秘钥文件权限过大，ssh会报错，需要缩小权限才能用
