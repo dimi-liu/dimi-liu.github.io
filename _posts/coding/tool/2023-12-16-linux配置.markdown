@@ -7,6 +7,7 @@ author: "dimi"
 header-img: "img/post-bg-universe.jpg"
 catalog: true
 tags: [coding,linux,tool]
+
 ---
 
 腾讯云要到期了，续期丧心病狂的贵，正好阿里云有99/年的活动，能续三年，买了个新实例，顺便记录下机器初始化的坑
@@ -111,8 +112,6 @@ scp -P port -r local_dir username@servername:remote_dir
 scp -P port username@servername:/path/filename /var/www/local_dir（本地目录）
 # 下载目录
 scp -P port -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
-
-
 ```
 
 ## 软件安装
@@ -135,6 +134,7 @@ rm -rf ./git-2.43.0
 # 在/etc/profile.d自定义脚本中新增环境变量
 vim /etc/profile.d/dimi_env.sh
 GIT_HOME=/app/git/prefix
+export PATH=$GIT_HOME/bin:$PATH
 ```
 
 其他设置
@@ -150,9 +150,7 @@ git config --global user.name "dimi aliyun"
 
 #### 安装miniconda
 
-镜像下载和镜像源配置可参考tuna
-
-[anaconda | 镜像站使用帮助 | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/)
+镜像下载和镜像源配置可参考tuna [anaconda | 镜像站使用帮助 | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/)
 
 ```bash
 # 查看tuna资源
@@ -244,7 +242,26 @@ vim /etc/docker/daemon.json
 }
 systemctl daemon-reload
 systemctl restart docker
+
+# docker 服务开机自动启动
+systemctl enable docker.service
+# 查看docker服务是否开启自动重新启动
+systemctl is-enabled docker
+#容器自动启动
+docker run --restart=always
+docker update --restart=always 容器id
+# 更新内存大小
+docker update -m 1600M --memory-swap 2048M docker-mysql
+
+
 ```
+
+--restart 参数说明：
+
+- no：容器退出时，不重启容器；
+- on-failure：只有在非0状态退出时才从新启动容器；
+- on-failure:3：在容器非正常退出时重启容器，最多重启 3 次
+- always：无论退出状态是如何，都重启容器；
 
 ### mysql
 
@@ -262,6 +279,29 @@ CREATE DATABASE xxx
 CREATE USER 'user'@'%' IDENTIFIED BY 'password';
 # 第一个*是数据库，可以改成允许访问的数据库名称,第二个*是数据库的表名称，代表允许访问任意的表
 grant all privileges on *.* to 'user'
+```
+
+docker-mysql 运行占用过大，修改配置
+
+```bash
+# 将mysql的配置文件复制到宿主机
+# 根据mysql版本不同，路径和文件名可能不同，比如 /etc/mysql/mysql.conf.d/mysqld.cnf
+docker cp docker-mysql:/etc/mysql/conf.d/docker.cnf docker.cnf
+
+# 添加如下设置
+[mysqld]
+performance_schema_max_table_instances=400
+table_definition_cache=400
+table_open_cache=256
+skip-host-cache
+skip-name-resolve
+
+# 将文件放回去
+docker cp docker.cnf docker-mysql:/etc/mysql/conf.d/docker.cnf
+
+# 重启容器
+docker restart docker-mysql
+
 ```
 
 ### dolt
@@ -283,16 +323,10 @@ rm -r dolt-linux-amd64
 
 # 拉去数据集
 dolt clone chenditc/investment_data
-
-
 ```
 
 ### vscode
 
-配置可以见vscode插件配置doc[【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
+配置可以见vscode插件配置doc [【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
 
-
-
-
-
-
+添加命令别名
