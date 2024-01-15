@@ -12,6 +12,8 @@ tags: [coding,linux,tool]
 
 腾讯云要到期了，续期丧心病狂的贵，正好阿里云有99/年的活动，能续三年，买了个新实例，顺便记录下机器初始化的坑
 
+update：2c2g配置内存不够用，退了，换了个实名在腾讯云上首单优惠买了3年的2c4g实例。。。。
+
 ## linux初始化
 
 ### 用户相关
@@ -105,11 +107,11 @@ service sshd restart
 
 ```bash
 # 上传文件
-scp -P port /path/filename username@servername:/path   
+scp -P {port} /path/filename username@servername:/path   
 # 上传目录
-scp -P port -r local_dir username@servername:remote_dir
+scp -P {port} -r local_dir username@servername:remote_dir
 # 下载文件
-scp -P port username@servername:/path/filename /var/www/local_dir（本地目录）
+scp -P {port} username@servername:/path/filename /var/www/local_dir（本地目录）
 # 下载目录
 scp -P port -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
 ```
@@ -252,8 +254,6 @@ docker run --restart=always
 docker update --restart=always 容器id
 # 更新内存大小
 docker update -m 1600M --memory-swap 2048M docker-mysql
-
-
 ```
 
 --restart 参数说明：
@@ -263,7 +263,17 @@ docker update -m 1600M --memory-swap 2048M docker-mysql
 - on-failure:3：在容器非正常退出时重启容器，最多重启 3 次
 - always：无论退出状态是如何，都重启容器；
 
+查看容器挂载信息
+
+```bash
+docker inspect docker-mysql | grep Mounts -A 20
+```
+
+ 
+
 ### mysql
+
+#### 基于docker部署
 
 为了省事，docker直接拉了
 
@@ -301,7 +311,26 @@ docker cp docker.cnf docker-mysql:/etc/mysql/conf.d/docker.cnf
 
 # 重启容器
 docker restart docker-mysql
+```
 
+#### 数据迁移
+
+```bash
+# 导出数据文件
+mysqldump -u {用户} -p{密码，特殊字符要加引号} {数据库} > {输出到哪个文件}
+# 导入
+mysql -u {用户} -p{密码，特殊字符要加引号} {数据库} < {输出到哪个文件}
+
+```
+
+### 
+
+### influxdb
+
+```bash
+docker pull influxdb
+# 运行influxdb
+docker run -d --name docker-influxdb -v /app/docker_data/influxdb:/var/lib/mysql -p 18806:8806 -e MYSQL_ROOT_PASSWORD="paic123$" mysql
 ```
 
 ### dolt
@@ -330,3 +359,13 @@ dolt clone chenditc/investment_data
 配置可以见vscode插件配置doc [【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
 
 添加命令别名
+
+## trouble shot
+
+### 修改linux文件权限会导致git跟踪文件权限变更
+
+git默认会跟踪文件的权限修改，当我们使用chmod指令的时候，git也会把被修改权限的文件添加到被修改的状态。
+
+解决方式是首先在项目下 cat .git/config 查看是否已经设置忽略文件权限跟踪，filemode=true 的时候即跟踪修改权限的文件。  
+运行 git config core.filemode false  
+然后我们运行 git status 那些被修改权限的文件已经不存在了。

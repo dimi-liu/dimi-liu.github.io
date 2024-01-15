@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "【vscode】 ssh远程登录配置"
+title: "【vscode】 vscode相关"
 subtitle: "vscode"
 date: 2023-08-13 09:38:17
 author: "dimi"
@@ -9,6 +9,7 @@ catalog: true
 tags: [coding,vscode,tool]
 ---
 
+## ssh工具
 vscode 可以通过ssh直接连接远程服务器在线编辑脚本，同时console可以集成bash界面
 
 ### 插件
@@ -57,6 +58,9 @@ ServerAliveInterval 120
 "remote.SSH.configFile": "C:\\Users\\{用户}\\.ssh\\config",
 ```
 
+## 调整tab多行显示
+vscode tab默认只显示一行，其他的要自己左右翻页，打开多行显示
+Workbench › Editor: Wrap Tabs
 
 
 
