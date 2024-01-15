@@ -113,7 +113,7 @@ scp -P {port} -r local_dir username@servername:remote_dir
 # 下载文件
 scp -P {port} username@servername:/path/filename /var/www/local_dir（本地目录）
 # 下载目录
-scp -P port -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
+scp -P {port} -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
 ```
 
 ## 软件安装
@@ -210,6 +210,8 @@ conda info
 
 ### docker
 
+#### 安装+一些简单配置
+
 同样参考tuna
 
 [docker-ce | 镜像站使用帮助 | 清华大学开源软件镜像站 | Tsinghua Open Source Mirror](https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/)
@@ -263,10 +265,12 @@ docker update -m 1600M --memory-swap 2048M docker-mysql
 - on-failure:3：在容器非正常退出时重启容器，最多重启 3 次
 - always：无论退出状态是如何，都重启容器；
 
-查看容器挂载信息
+#### 查看容器挂载信息
 
 ```bash
+# 主要看挂载的磁盘路径啥的
 docker inspect docker-mysql | grep Mounts -A 20
+
 ```
 
  
@@ -327,10 +331,21 @@ mysql -u {用户} -p{密码，特殊字符要加引号} {数据库} < {输出到
 
 ### influxdb
 
+试图研究了下物理部署，然后又被华丽的劝退了，果然懒人玩票就适合全容器化。。
+
+有几点需要注意
+
+influxdb主要的存储为 bolt-path 和 engine-path 分别为连接对象和物理存储，这里默认是在同一个目录下的，在dokcer镜像中是 /var/lib/influxdb2 （这些都取决于版本和部署模式，比如yum安装的service在etc目录下，乱的很，还是docker省事），配置文件的环境变量为INFLUX_CONFIGS_PATH=/etc/influxdb2/influx-configs，因此将两个路径挂载出来；
+
+另外，/var/lib/influxdb2 就算不挂在，也会自动在docker data路径下自动创建挂载
+
 ```bash
 docker pull influxdb
 # 运行influxdb
-docker run -d --name docker-influxdb -v /app/docker_data/influxdb:/var/lib/mysql -p 18806:8806 -e MYSQL_ROOT_PASSWORD="paic123$" mysql
+docker run -d --name docker-influx --restart always -v /app/docker_data/influx:/var/lib/influxdb2 -v /app/docker_data/influx/conf:/etc/influxdb2 -p 18806:8086 influxdb
+# /var/lib/influxdb2 下面有engine和bolt，engine里面是数据路径
+# INFLUX_CONFIGS_PATH=/etc/influxdb2/influx-configs 下面有配置文件
+# 18806:8086 为http服务端口
 ```
 
 ### dolt
