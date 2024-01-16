@@ -116,6 +116,55 @@ scp -P {port} username@servername:/path/filename /var/www/local_dir（本地目�
 scp -P {port} -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
 ```
 
+### 加数据盘并软链接迁移数据
+
+20240116 系统盘只有60GB不够用，加了块100GB的云磁盘，为了不影响服务，把docker数据挪过去，在原来位置放个软链接
+
+#### 挂载磁盘
+
+参考 [轻量应用服务器 初始化云硬盘（小于2TB）-操作指南-文档中心-腾讯云](https://cloud.tencent.com/document/product/1207/81981#757)
+
+腾讯云加磁盘的时候默认挂载路径在/root/data1，浑身不得劲，卸载了手动挂载
+
+```bash
+#查看磁盘名称
+fdisk -l 
+# /dev/vdb
+
+# 执行以下命令，对 /dev/vdb 裸设备直接创建文件系统格式。
+mkfs -t ext4 /dev/vdb
+# 设置文件系统为 EXT4 
+
+# 创建挂载点
+mkdir /data1
+
+# 执行挂载
+mount /dev/vdb /data1
+df -TH
+```
+
+设置开机自动挂载，可以参考上面的链接
+
+#### 设置软链接
+
+参考 https://blog.csdn.net/weixin_40242845/article/details/127078438
+
+以目录/app/docker_data 迁移到 /data1/docker_data为例
+
+```bash
+# 复制文件
+cp -r /app/docker_data /data1/docker_data
+# 备份源文件
+mv /app/docker_data /app/docker_data.bak
+# 创建软链接
+ln -s /data1/docker_data /app/docker_data
+# 查看软链接是否生效
+ll /app/docker_data
+# 没啥问题删除备份文件
+rm -rf /app/docker_data.bak
+
+```
+
 ## 软件安装
 
 ### git
@@ -270,10 +319,7 @@ docker update -m 1600M --memory-swap 2048M docker-mysql
 ```bash
 # 主要看挂载的磁盘路径啥的
 docker inspect docker-mysql | grep Mounts -A 20
-
 ```
-
- 
 
 ### mysql
 
@@ -324,10 +370,38 @@ docker restart docker-mysql
 mysqldump -u {用户} -p{密码，特殊字符要加引号} {数据库} > {输出到哪个文件}
 # 导入
 mysql -u {用户} -p{密码，特殊字符要加引号} {数据库} < {输出到哪个文件}
-
 ```
 
-### 
+#### docker data迁移导致的问题
+
+参考 https://blog.csdn.net/tianlangstudio/article/details/112554920
+
+完成数据迁移并配置软链接后，发现docker起不来，查看下container日志
+
+```bash
+docker logs docker-mysql
+
+mysqld: Can't create/write to file '/tmp/ibrs7yxO' (OS errno 13 - Permission denied)
+2024-01-16T07:38:05.648440Z 1 [ERROR] [MY-012576] [InnoDB] Unable to create temporary file inside "/tmp"; errno: 13
+2024-01-16T07:38:05.648470Z 1 [ERROR] [MY-012930] [InnoDB] Plugin initialization aborted with error Generic error.
+2024-01-16T07:38:05.648515Z 1 [ERROR] [MY-010334] [Server] Failed to initialize DD Storage Engine
+2024-01-16T07:38:05.648756Z 0 [ERROR] [MY-010020] [Server] Data Dictionary initialization failed.
+2024-01-16T07:38:05.648778Z 0 [ERROR] [MY-010119] [Server] Aborting
+```
+
+发现是写入权限问题，新位置默认权限不太行，查看容器信息
+
+docker inspect docker-mysql
+
+找到data下面的各种dir（主要是workdir），发现是这个路径 ，直接777，问题解决
+
+/data1/docker_data/overlay2/797b0bfb7d4252e02de00a21881c3a1f9430a88227eac2ada2787230c57f53a2
+
+```bash
+chmod -R 777 /data1/docker_data/overlay2/797b0bfb7d4252e02de00a21881c3a1f9430a88227eac2ada2787230c57f53a2
+```
+
+*为了后续方便我还把/data1/docker_data目录改成了777，不知道这个有没有关系，也懒得验证了，备注下
 
 ### influxdb
 
