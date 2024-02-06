@@ -36,6 +36,46 @@ vim /etc/sudoers
 opr ALL=(ALL) NOPASSWD: /usr/bin/su
 ```
 
+### 启动文件执行顺序
+
+主要分为linux系统启动和linux登录启动shell环境
+
+#### linux系统启动
+
+1. 加载固件和硬件设备 通过引导设备找到引导程序
+
+2. 引导程序,通过加载操作系统内核和初始化RAM磁盘作为根文件系统
+
+3. 内核启动参数 通过引导程序传递参数影响内核行为
+
+4. /etc/fstab 系统查看文件的挂载点和挂载选项 启动时进行
+
+5. 自启动文件 /etc/rc.d 和/etc/ini.d 
+
+6. /etc/inittab或/etcc/event.d文件 指定系统再不同运行级别运行什么进程 不同运行级别对应不同的系统版本 例如单用户模式和多用户模式 # ubuntu20.04没有这两个文件
+
+7. /etc/profile和~/.bashrc 文件，对用户的shell进行初始化和环境变量设置，/etc/profile会从 /etc/profile.d目录中读取信息
+
+8. ~/.bash_profile和~./bash_login 文件用于个别用户的shell环境初始化 用户登录时会读取内容
+
+9. /etc/sysctl.confi : 文件包含了内核参数的配置会读取该文件的配置
+
+思路: 加载固件和硬件找到引导设备 - 引导设备找到引导程序 - 引导程序开启调整参数开启内核 - 查看文件挂载 - 查看文件自启动 - 查看文件进程运行级别 - 查看shell环境文件 - 查看用户初始读取文件 - 查看文件内核参数
+
+固硬发引导设备-引导程序-引导程序调内核-文件挂载 -文件启动 - 运行级别 -shell初始化 - shell的读取 - 系统内核文件
+
+#### linux登录启动shell环境
+
+交互式shell : /etc/profile -> /etc/profile.d -> ~/.bash_profile -> ~/.bash_login -> ~/.profile
+
+~/.bash_profile 中会调用 ~/.bashrc，然后会调用/etc/bashrc ： 为每一个运行bash shell的用户都执行一次,每开启一个终端就会读取一次
+
+/etc/enviorment 和 /etc/profile 的区别
+
+enviorment时环境变量 不属于用户的,例如系统的一些信息等就需要读取/etc/enviorment
+
+
+
 ### 环境变量
 
 采用export设置的环境变量，在退出Shell后就会失效，下次登录时需要重新设置。如果希望环境变量永久生效，需要在登录脚本文件中配置。
@@ -131,7 +171,7 @@ scp -P {port} -r username@servername:/var/www/remote_dir/（远程目录） /var
 fdisk -l 
 # /dev/vdb
 
-# 执行以下命令，对 /dev/vdb 裸设备直接创建文件系统格式。
+# 执行以下命令，对 /dev/vdb 裸设备直接创建文件系统格式（这里回格式化）。
 mkfs -t ext4 /dev/vdb
 # 设置文件系统为 EXT4 
 
@@ -141,9 +181,21 @@ mkdir /data1
 # 执行挂载
 mount /dev/vdb /data1
 df -TH
+
+# 设置为开机自动挂载（务必设置，否则重启会有问题）这里使用文件系统的 UUID
+# 备份 /etc/fstab
+cp -r /etc/fstab /etc/fstab_bak
+
+# vim 编辑/etc/fstab，添加
+<设备信息> <挂载点> <文件系统格式> <文件系统安装选项> <文件系统转储频率> <启动时的文件系统检查顺序>
+UUID=d489ca1c-5057-4536-81cb-ceb2847f9954 /data  ext4 defaults     0   0
+
+# 验证，没返回即正常，然后重启验证
+mount -a 
+df -th
 ```
 
-设置开机自动挂载，可以参考上面的链接
+0117凌晨更新，漏看了文档，没搞自动挂载，然后重启的时候磁盘没挂上直接ssh崩了，直接ping不通了。提了工单开救援模式才解决。。。。在上面补充下挂载方式
 
 #### 设置软链接
 
@@ -162,8 +214,13 @@ ln -s /data1/docker_data /app/docker_data
 ll /app/docker_data
 # 没啥问题删除备份文件
 rm -rf /app/docker_data.bak
-
 ```
+
+### 添加命令别名
+
+对于一些常用命令可以设置别名来简化命令
+
+比如 ls -al 改为 lll，sudo su - 改为 rr等，参考上面的shell登录文件执行顺序，为了保证对所有用户都生效，选择在/etc/profile.d中添加脚本用来收集别名
 
 ## 软件安装
 
@@ -447,7 +504,7 @@ dolt clone chenditc/investment_data
 
 配置可以见vscode插件配置doc [【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
 
-添加命令别名
+
 
 ## trouble shot
 
