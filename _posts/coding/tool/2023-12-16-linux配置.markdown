@@ -74,8 +74,6 @@ opr ALL=(ALL) NOPASSWD: /usr/bin/su
 
 enviorment时环境变量 不属于用户的,例如系统的一些信息等就需要读取/etc/enviorment
 
-
-
 ### 环境变量
 
 采用export设置的环境变量，在退出Shell后就会失效，下次登录时需要重新设置。如果希望环境变量永久生效，需要在登录脚本文件中配置。
@@ -223,6 +221,24 @@ rm -rf /app/docker_data.bak
 比如 ls -al 改为 lll，sudo su - 改为 rr等，参考上面的shell登录文件执行顺序，为了保证对所有用户都生效，选择在/etc/profile.d中添加脚本用来收集别名
 
 ## 软件安装
+
+### yum安装
+
+有时候yum安装会出现找不到包的时候，这时候需要安装epel-release
+
+```bash
+yum install epel-release
+```
+
+EPEL的全称叫 Extra Packages for Enterprise Linux 。EPEL是由 Fedora 社区打造，为 RHEL 及衍生发行版如 CentOS、Scientific Linux 等提供高质量软件包的项目。装上了 EPEL之后，就相当于添加了一个第三方源。参考这篇文章[EPEL到底是什么，为何经常要安装epel-release软件包-CSDN博客](https://blog.csdn.net/weixin_41831919/article/details/109035936))]
+
+### autojump
+
+通过yum直接安装然后重启shell即可
+
+装这玩意主要是省去了cd不同目录的麻烦，可以直接jump过去，在mac zsh上装了一个很好用，就在服务器bash上也装了。
+
+具体用法可以参考，[github](https://github.com/wting/autojump)页面
 
 ### git
 
@@ -503,8 +519,6 @@ dolt clone chenditc/investment_data
 ### vscode
 
 配置可以见vscode插件配置doc [【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
-
-
 
 ## trouble shot
 
