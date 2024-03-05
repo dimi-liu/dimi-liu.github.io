@@ -152,6 +152,8 @@ scp -P {port} -r local_dir username@servername:remote_dir
 scp -P {port} username@servername:/path/filename /var/www/local_dir（本地目录）
 # 下载目录
 scp -P {port} -r username@servername:/var/www/remote_dir/（远程目录） /var/www/local_dir（本地目录）
+# 做了免密之后，config里面配置host名称和端口，可以使用hostname快速调用
+scp file boom:~ # 上传file到远程主机下的~路径，boom是hostname
 ```
 
 ### 加数据盘并软链接迁移数据
@@ -375,7 +377,7 @@ systemctl enable docker.service
 systemctl is-enabled docker
 #容器自动启动
 docker run --restart=always
-docker update --restart=always 容器id
+docker update --restart always 容器id
 # 更新内存大小
 docker update -m 1600M --memory-swap 2048M docker-mysql
 ```
@@ -392,6 +394,12 @@ docker update -m 1600M --memory-swap 2048M docker-mysql
 ```bash
 # 主要看挂载的磁盘路径啥的
 docker inspect docker-mysql | grep Mounts -A 20
+```
+
+#### 查看容器日志
+
+```bash
+docker logs <容器名>
 ```
 
 ### mysql
@@ -519,6 +527,36 @@ dolt clone chenditc/investment_data
 ### vscode
 
 配置可以见vscode插件配置doc [【vscode】 ssh远程登录配置 - dimi's blog](https://dimi-liu.github.io/2023/08/13/vscode-ssh-远程登录配置/)，第一次连接会在server端安装vscode-server；若未联网，则需要离线安装，路径在 ~/.vscode-server
+
+### nginx
+
+docker 快速部署，参考 https://github.com/dunwu/nginx-tutorial 学习
+
+```bash
+docker pull nginx
+# 启动容器
+docker run --name nginx \
+-p 6606:80 \
+-v /data1/docker_data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
+-v /data1/docker_data/nginx/conf/conf.d:/etc/nginx/conf.d \
+-v /data1/docker_data/nginx/logs:/var/log/nginx \
+-d nginx 
+# linux 会有报错，会识别nginx.conf 问文件夹而不是文件，有报错，手动删除改成文件
+# docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting "/data1/docker_data/nginx/conf/nginx.conf" to rootfs at "/etc/nginx/nginx.conf": mount /data1/docker_data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf (via /proc/self/fd/6), flags: 0x5000: not a directory: unknown: Are you trying to mount a directory onto a file (or vice-versa)? Check if the specified host path exists and is the expected type.
+# 然后又因为nginx.conf是空的，容器会报错，日志 nginx: [emerg] no "events" section in configuration
+# 简单粗暴的方法是先不挂载启动一个ng，然后把对应文件拿出来，再重新挂载启动，cp文件出来
+docker cp nginx:/etc/nginx/conf.d/default.conf ~
+docker cp nginx:/etc/nginx/nginx.conf ~
+
+# 重新加载配置（目前测试无效，只能重启服务）
+docker exec -it my-nginx nginx -s reload
+# 停止服务
+docker exec -it my-nginx nginx -s stop 
+# 或者
+docker stop my-nginx
+# 重新启动服务
+docker restart my-nginx
+```
 
 ## trouble shot
 

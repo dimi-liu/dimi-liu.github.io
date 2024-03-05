@@ -1,0 +1,114 @@
+---
+layout: post
+title: "【linux】常用bash命令"
+subtitle: "bash"
+date: 2024-02-20 09:22:18
+author: "dimi"
+header-img: "img/post-bg-unix-linux.jpg"
+catalog: true
+tags: [coding,linux,bash]
+---
+
+常用bash函数
+
+## 1. netstat 查看端口占用
+
+netstat -tunlp 用于显示 tcp，udp 的端口和进程等相关情况
+
+- -t (tcp) 仅显示tcp相关选项
+- -u (udp)仅显示udp相关选项
+- -n 拒绝显示别名，能显示数字的全部转化为数字，显示数字地址而不是主机名
+- -l 仅列出在Listen(监听)的服务状态
+- -p 显示进程的 PID 和名称。仅当以 root 或 sudo 用户身份运行命令时，才会显示此信息
+
+```bash
+# netstat -tunlp | grep 8000
+tcp        0      0 0.0.0.0:8000            0.0.0.0:*               LISTEN      26993/nodejs   
+```
+
+## 2. awk 文本处理
+
+awk命令用于文本处理，可以实现一些复杂逻辑
+
+- -F fs or --field-separator fs  
+  指定输入文件拆分隔符，fs是一个字符串或者是一个正则表达式，如-F:。默认分割符是空格
+- -f scripfile or --file scriptfile  
+  接脚本，从脚本文件中读取awk命令。
+- -v var=value or --asign var=value  
+  赋值一个用户定义变量。
+
+主要有四种用法
+
+```bash
+awk '{[pattern] action}' {filenames}   # 行匹配语句 awk '' 只能用单引号
+awk -F  #-F相当于内置变量FS, 指定分割字符
+awk -v  # 设置变量
+awk -f {awk脚本} {文件名}
+```
+
+```bash
+# 示例，log.txt文本如下
+2 this is a test
+3 Do you like awk
+This's a test
+10 There are orange,apple,mongo
+
+# 每行按空格或TAB(默认)分割，输出文本中的1、4列
+awk '{print $1,$4}' log.txt
+ ---------------------------------------------
+ 2 a
+ 3 like
+ This's
+ 10 orange,apple,mongo
+
+ # 格式化输出
+awk '{printf "%-8s %-10s\n",$1,$4}' log.txt
+ ---------------------------------------------
+ 2        a
+ 3        like
+ This's
+ 10       orange,apple,mongo
+ 
+# 使用,分割，输出1，2列
+awk -F, '{print $1,$2}'   log.txt
+ ---------------------------------------------
+ 2 this is a test
+ 3 Do you like awk
+ This's a test
+ 10 There are orange apple
+
+ # 或者使用内建变量
+awk 'BEGIN{FS=","} {print $1,$2}'     log.txt
+ ---------------------------------------------
+ 2 this is a test
+ 3 Do you like awk
+ This's a test
+ 10 There are orange apple
+
+ # 使用多个分隔符.先使用空格分割，然后对分割结果再使用","分割
+awk -F '[ ,]'  '{print $1,$2,$5}'   log.txt
+ ---------------------------------------------
+ 2 this test
+ 3 Do awk
+ This's a
+ 10 There apple
+
+# 使用-v设置变量
+awk -va=1 '{print $1,$1+a}' log.txt
+ ---------------------------------------------
+ 2 3
+ 3 4
+ This's 1
+ 10 11
+ $ awk -va=1 -vb=s '{print $1,$1+a,$1b}' log.txt
+ ---------------------------------------------
+ 2 3 2s
+ 3 4 3s
+ This's 1 This'ss
+ 10 11 10s
+
+# 使用脚本
+awk -f cal.awk log.txt
+```
+
+

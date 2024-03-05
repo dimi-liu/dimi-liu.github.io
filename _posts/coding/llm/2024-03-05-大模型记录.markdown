@@ -1,0 +1,33 @@
+---
+layout: post
+title: "大模型记录"
+subtitle: "llm"
+date: 2024-03-05 16:15:14
+author: "dimi"
+header-img: "img/post-bg-alitrip.jpg"
+catalog: true
+tags: [coding,llm]
+---
+
+## llm介绍
+
+llm——large language model，通常指的是生成式ai模型，执行的任务实质是next word generation；
+
+llm始于transformer的提出 [Attention Is All You Need](https://arxiv.org/abs/1706.03762). 参考u管视频 [Attention is all you need (Transformer)](https://youtu.be/bCz4OMemCcA?si=UqbSFU18z_mqx908)，Coursera地址 [Generative AI with Large Language Models](https://www.coursera.org/learn/generative-ai-with-llms)
+
+![大模型工程化](/img/in-post/llm/llmlifecycle.png)
+<small class="img-hint">大模型工程化全景</small>
+
+如今的大模型，因为算力需求越来越高，大部分的使用都是基于现有模型做prompt或者预训练微调(fine tuning)，即图中的后面两个部分，并基于此实现一些工程化应用
+
+常见的llm有如下应用
+
+- Essay Writing 文章书写
+
+- Summarization 信息总结
+
+- Translation 翻译
+
+- Information retrieval 信息提取
+
+- Invoke APIs and actions 通过api调用并结合其他应用提供服务（搜索引擎等）
