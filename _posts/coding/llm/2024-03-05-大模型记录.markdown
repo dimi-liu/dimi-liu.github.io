@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "大模型记录"
-subtitle: "llm"
+title: "【llm】大模型记录"
+subtitle: "llm in a nutshell"
 date: 2024-03-05 16:15:14
 author: "dimi"
 header-img: "img/post-bg-alitrip.jpg"
@@ -13,7 +13,7 @@ tags: [coding,llm]
 
 llm——large language model，通常指的是生成式ai模型，执行的任务实质是next word generation；
 
-llm始于transformer的提出 [Attention Is All You Need](https://arxiv.org/abs/1706.03762). 参考u管视频 [Attention is all you need (Transformer)](https://youtu.be/bCz4OMemCcA?si=UqbSFU18z_mqx908)，Coursera地址 [Generative AI with Large Language Models](https://www.coursera.org/learn/generative-ai-with-llms)
+本系列参考了Coursera课程 [Generative AI with Large Language Models](https://www.coursera.org/learn/generative-ai-with-llms)
 
 ![大模型工程化](/img/in-post/llm/llmlifecycle.png)
 <small class="img-hint">大模型工程化全景</small>
@@ -31,3 +31,54 @@ llm始于transformer的提出 [Attention Is All You Need](https://arxiv.org/abs/
 - Information retrieval 信息提取
 
 - Invoke APIs and actions 通过api调用并结合其他应用提供服务（搜索引擎等）
+
+## 主流模型架构
+
+![大模型技术链路分类](/img/in-post/llm/modelarc.jpg)
+<small class="img-hint">大模型技术链路分类</small>
+
+从模型结构视角来看，当前模型主要分为三类
+
+- encoder only：BERT、ROBERTA等
+
+- encoder-decoder：T5、BART、ChatGLM等
+
+- decoder only：包括GPT-4，Llama、Claude等
+
+![三种模型架构适合的分类](/img/in-post/llm/modelarch&task.png)
+<small class="img-hint">三种模型架构适合的分类</small>
+
+### encoder only
+
+Autoencoding models，又叫做Masked Language Modeling (MLM)，因为可以从seq的首位两个方向预测未知单词，但是因为encoder结构问题，输出的序列长度和输入的相同，因此非常适合用来做完形填空。常见的应用场景有：Sentiment analysis，Named entity recognition，Word classification等
+
+### decoder only
+
+Autoregressive models，又叫做Causal Language Modeling (CLM)，只能从seq起始预测下一个单词，但是不限制生成长度，是目前的主流模型架构，应用场景较为广泛
+
+### encoder-decoder
+
+Sequence-to-sequence models，又叫做Span Corruption，可以用来做文本替换，常见的应用场景有：Translation，Text summarization，Question answering
+
+## 工程化相关
+
+记录一些模型工程化相关的事项，包括训练显存占用、模型量化方案、训练策略优化等
+
+### 训练显存占用
+
+llm工程应用中，遇到的最普遍的的问题就是显存不够；一般情况下，1B的模型参数加载到显存中需要4GB显存，而要进行训练则需要24GB显存，扩大六倍。主要包含**模型参数、adam优化器两个state、训练梯度、激活函数和临时变量等**，1:2:1:2的显存占用比例
+
+### 模型量化
+
+model Quantization，可以通过减少参数精度来减少显存占用
+
+![不同精度的模型量化对比](/img/in-post/llm/Quantization.png)
+<small class="img-hint">不同精度的模型量化对比</small>
+
+### 训练策略优化
+
+因为显存占用过高，需要引入分布式gpu训练算法
+
+Distributed Data Parallel (DDP)算法、Fully Sharded Data Parallel (FSDP)算法
+
+算力衡量单位: petaflop/s-day

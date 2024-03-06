@@ -51,3 +51,4 @@ jekyll serve
 3. 修改渲染代码
 
     在layout里面，一些引用在include，自定义了mathjax类，数学公式
+    如果需要使用数学公式，需要手动启用数学公式渲染，在markdown标签头里面添加  mathjax: true   #开启latex公式支持
