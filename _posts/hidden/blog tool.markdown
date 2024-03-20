@@ -34,6 +34,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/ruby/include"
 ``` bash
 # complie
 cd E:\github\dimi-liu.github.io
+cd ~/code/github/dimi-liu.github.io
 jekyll serve
 # Server address: http://127.0.0.1:4000/
 ```
