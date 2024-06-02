@@ -74,6 +74,12 @@ opr ALL=(ALL) NOPASSWD: /usr/bin/su
 
 enviorment时环境变量 不属于用户的,例如系统的一些信息等就需要读取/etc/enviorment
 
+**NOTE**
+
+`/etc/bashrc` 或 `~/.bashrc` 中有`echo`,`printf`等输出语句时，无法使用scp和sftp命令传文件
+
+将相应命令挪到 `/etc/profile` 或 `~/.bash_profile` 中
+
 ### 环境变量
 
 采用export设置的环境变量，在退出Shell后就会失效，下次登录时需要重新设置。如果希望环境变量永久生效，需要在登录脚本文件中配置。
