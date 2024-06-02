@@ -12,7 +12,9 @@ tags: [coding,linux,tool]
 linux自定义环境变量的设置问题
 
 ## 1. linux 启动的执行顺序
+
 首先是几个路径的区别
+
 ```bash
 # 用来设置系统环境参数，比如$PATH. 这里面的环境变量是对系统内所有用户生效的
 /etc/profile 
@@ -25,6 +27,7 @@ linux自定义环境变量的设置问题
 # ~/.bashrc 是交互式 non-login 方式进入 bash 运行的，用户不一定登录，只要以该用户身份运行命令行就会读取该文件
 ~/.bashrc
 ```
+
 另外/etc/profile中设定的变量(全局)的可以作用于任何用户,而~/.bashrc等中设定的变量(局部)只能继承/etc/profile中的变量,他们是"父子"关系。
 
 linux登录后，文件的登录顺序[参考这里](https://blog.csdn.net/dingxy/article/details/4016383)  
@@ -34,7 +37,9 @@ linux登录后，文件的登录顺序[参考这里](https://blog.csdn.net/dingx
 /etc/environment是设置整个系统的环境，而/etc/profile是设置所有用户的环境，前者与登录用户无关，后者与登录用户有关。
 
 ## 2.使用 /etc/profile.d 而不是 /etc/profile 来配置环境变量 Linux
+
 /etc/profile 会在每次启动时加载 /etc/profile.d 下的脚本
+
 ```bash
 if [ -d /etc/profile.d ]; then
   for i in /etc/profile.d/*.sh; do
@@ -45,13 +50,8 @@ if [ -d /etc/profile.d ]; then
   unset i
 fi
 ```
+
 因此只需要在 /etc/profile.d 下新增一个脚本用来添加环境变量即可  
 注意，这里为login级别的变量，重新登录 shell，或者 source /etc/profile
 
 比如cron执行脚本，是不会读到 /etc/profile 的变量的，需要在命令中添加 source /etc/profile
-
-
-
-
-
-

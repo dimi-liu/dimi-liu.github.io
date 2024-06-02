@@ -10,6 +10,7 @@ tags: [coding,vscode,tool]
 ---
 
 ## ssh工具
+
 vscode 可以通过ssh直接连接远程服务器在线编辑脚本，同时console可以集成bash界面
 
 ### 插件
@@ -24,11 +25,14 @@ vscode 可以通过ssh直接连接远程服务器在线编辑脚本，同时cons
 其次根据使用需要加装其他的，比如git len，python，jupyter等  加装的插件也会在 ~/.vscode-server
 
 ### 生成ssh秘钥
+
 这步同git免密配置一样，在本地 ssh-keygen 生成在 "C:\Users\{用户}\.ssh" 或 "~/.ssh" 下面，默认私钥为 id_rsa ，公钥为 id_rsa.pub 。  
 将公钥内容放置到server端，在 ~/.ssh 下面新建 authorized_keys 文件。把公钥贴进去即可。
 
 ### config文件
+
 如果某些设置用的不是默认选项，比如端口等，则需要设置config文件。
+
 ```bash
 Host <连接名称>
 HostName host ip
@@ -37,10 +41,13 @@ PreferredAuthentications publickey
 IdentityFile "C:\Users\{用户}\.ssh\id_rsa"
 Port <ssh可用端口>
 ```
+
 放置在登录端的 .ssh下面。
 
 ### 秘钥权限问题
+
 如果秘钥文件权限过大，ssh会报错，需要缩小权限才能用
+
 ```bash
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/rsa
@@ -48,19 +55,21 @@ chmod 600 ~/.ssh/authorized_keys
 ```
 
 ### 断连问题
+
 远程连接经常断开，可以选择在config文件中设置  
+
 ```bash
 ServerAliveInterval 120
 ```
+
 或者在vscode中设置
+
 ```json
 "remote.SSH.connectTimeout": 6000,
 "remote.SSH.configFile": "C:\\Users\\{用户}\\.ssh\\config",
 ```
 
 ## 调整tab多行显示
+
 vscode tab默认只显示一行，其他的要自己左右翻页，打开多行显示
 Workbench › Editor: Wrap Tabs
-
-
-

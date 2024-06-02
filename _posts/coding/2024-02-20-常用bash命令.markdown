@@ -68,7 +68,7 @@ awk '{printf "%-8s %-10s\n",$1,$4}' log.txt
  3        like
  This's
  10       orange,apple,mongo
- 
+
 # 使用,分割，输出1，2列
 awk -F, '{print $1,$2}'   log.txt
  ---------------------------------------------
@@ -110,5 +110,3 @@ awk -va=1 '{print $1,$1+a}' log.txt
 # 使用脚本
 awk -f cal.awk log.txt
 ```
-
-
